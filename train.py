@@ -41,7 +41,8 @@ with open(os.path.join(exp_dir, "cfg.json")) as f:
 resize_shape = tuple(exp_cfg['dataset']['resize_shape'])
 
 device = torch.device(exp_cfg['device'])
-tensorboard = TensorBoard(exp_dir)
+
+tensorboard = TensorBoard(exp_dir + '/logs')
 
 # ------------ train data ------------
 # # CULane mean, std

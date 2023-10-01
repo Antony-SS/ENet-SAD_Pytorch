@@ -70,7 +70,9 @@ class Tusimple(Dataset):
 
     def generate_label(self):
         save_dir = os.path.join(self.data_dir_path, "seg_label")
+        print(save_dir)
         os.makedirs(save_dir, exist_ok=True)
+
 
         # --------- merge json into one file ---------
         with open(os.path.join(save_dir, "train.json"), "w") as outfile:

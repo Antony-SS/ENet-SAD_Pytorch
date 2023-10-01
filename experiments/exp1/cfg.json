@@ -1,11 +1,11 @@
 {
   "device": "cuda:0",
-  "MAX_EPOCHES": 80,
+  "MAX_EPOCHES": 100,
   "model": "enet_sad",
 
   "dataset": {
-    "dataset_name": "CULane",
-    "batch_size": 12,
+    "dataset_name": "Tusimple",
+    "batch_size": 5,
     "resize_shape": [800, 288]
   },
 
