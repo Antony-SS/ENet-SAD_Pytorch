@@ -1,16 +1,12 @@
-# Code copied from pytorch-tutorial https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/04-utils/tensorboard/logger.py 
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-import scipy.misc 
+import scipy.misc
 try:
     from StringIO import StringIO  # Python 2.7
 except ImportError:
     from io import BytesIO         # Python 3.x
-
-
 class TensorBoard(object):
-    
     def __init__(self, log_dir):
         """Create a summary writer logging to log_dir."""
         self.writer = tf.summary.create_file_writer(log_dir)
@@ -25,35 +21,25 @@ class TensorBoard(object):
     def image_summary(self, tag, images, step):
         """Log a list of images."""
 
-        img_data = []
+        img_summaries = []
         for i, img in enumerate(images):
-            # Write the image to a string
             try:
                 s = StringIO()
             except:
                 s = BytesIO()
-            # scipy.misc.toimage(img).save(s, format="png")
             Image.fromarray(img).save(s, format='png')
 
 
             # Create an Image object
-            # img_sum = tf.summary.image(encoded_image_string=s.getvalue(),
-            #                            height=img.shape[0],
-            #                            width=img.shape[1])
-            # print(s)
-            # with self.writer.as_default():
-            #     tf.summary.image(name= '%s/%d' % (tag, i), data= np.reshape(img, (-1,288,800,3)), step = step)
-
+            img_sum = tf.Summary.Image(encoded_image_string=s.getvalue(),
+                                       height=img.shape[0],
+                                       width=img.shape[1])
             # Create a Summary value
-            # img_summaries.append(tf.compat.v1.summary.Value(tag='%s/%d' % (tag, i), image=img_sum))
-            # img_summaries.append(img_sum)
-            img_data.append(img)
-        
-        # np.reshape(i)
-        with self.writer.as_default():
-            tf.summary.image(name=tag, data= np.reshape(img_data, (-1, 288, 800, 3)), step=step)
-            self.writer.flush()
+            img_summaries.append(tf.Summary.Value(tag='%s/%d' % (tag, i), image=img_sum))
 
+        # Create and write Summary
+        summary = tf.Summary(value=img_summaries)
+        self.writer.add_summary(summary, step)
         
     def histo_summary(self, tag, values, step, bins=1000):
         """Log a histogram of the tensor of values."""
@@ -62,24 +48,23 @@ class TensorBoard(object):
         counts, bin_edges = np.histogram(values, bins=bins)
 
         # Fill the fields of the histogram proto
-        # hist = tf.HistogramProto()
-        # hist.min = float(np.min(values))
-        # hist.max = float(np.max(values))
-        # hist.num = int(np.prod(values.shape))
-        # hist.sum = float(np.sum(values))
-        # hist.sum_squares = float(np.sum(values**2))
+        hist = tf.HistogramProto()
+        hist.min = float(np.min(values))
+        hist.max = float(np.max(values))
+        hist.num = int(np.prod(values.shape))
+        hist.sum = float(np.sum(values))
+        hist.sum_squares = float(np.sum(values**2))
 
         # Drop the start of the first bin
-        # bin_edges = bin_edges[1:]
+        bin_edges = bin_edges[1:]
 
         # Add bin edges and counts
-        # for edge in bin_edges:
-        #     hist.bucket_limit.append(edge)
-        # for c in counts:
-        #     hist.bucket.append(c)
+        for edge in bin_edges:
+            hist.bucket_limit.append(edge)
+        for c in counts:
+            hist.bucket.append(c)
 
         # Create and write Summary
-        # summary = tf.summary(value=[tf.summary.Value(tag=tag, histo=hist)])
-        with self.writer.as_default():
-            tf.summary.histogram(tag, values, step=step, buckets=bins)
-            self.writer.flush()
+        summary = tf.Summary(value=[tf.Summary.Value(tag=tag, histo=hist)])
+        self.writer.add_summary(summary, step)
+        self.writer.flush()
