@@ -12,6 +12,9 @@ TUSimple/
 experiments/exp1/logs/
 experiments/exp1/evaluate/
 experiments/exp1/coord_output/
+experiments/exp2/logs/
+experiments/exp2/evaluate/
+experiments/exp2/coord_output/
 build/
 develop-eggs/
 dist/
