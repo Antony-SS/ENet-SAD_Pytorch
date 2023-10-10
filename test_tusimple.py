@@ -16,7 +16,7 @@ from utils.transforms import *
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--exp_dir", type=str, default="./experiments/exp3")
+    parser.add_argument("--exp_dir", type=str, default="./experiments/exp1")
     args = parser.parse_args()
     return args
 

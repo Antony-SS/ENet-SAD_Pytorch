@@ -40,10 +40,16 @@ class Tusimple(Dataset):
             raise FileNotFoundError("List file doesn't exist. Label has to be generated! ...")
 
         with open(listfile) as f:
+            count = 0
             for line in f:
                 line = line.strip()
                 l = line.split(" ")
-                self.img_list.append(os.path.join(self.data_dir_path, l[0][1:]))  # l[0][1:]  get rid of the first '/' so as for os.path.join
+                if not os.path.exists(os.path.join(self.data_dir_path, l[0][1:])):
+                    print(os.path.join(self.data_dir_path, l[0][1:]))
+                    count += 1
+                    print(count)
+                else:
+                    self.img_list.append(os.path.join(self.data_dir_path, l[0][1:]))  # l[0][1:]  get rid of the first '/' so as for os.path.join
                 self.segLabel_list.append(os.path.join(self.data_dir_path, l[1][1:]))
                 self.exist_list.append([int(x) for x in l[2:]])
 
@@ -58,9 +64,9 @@ class Tusimple(Dataset):
             exist = None
 
         sample = {'img': img,
-                  'segLabel': segLabel,
-                  'exist': exist,
-                  'img_name': self.img_list[idx]}
+                'segLabel': segLabel,
+                'exist': exist,
+                'img_name': self.img_list[idx]}
         if self.transforms is not None:
             sample = self.transforms(sample)
         return sample

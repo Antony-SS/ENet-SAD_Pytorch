@@ -24,7 +24,7 @@ import pickle
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--exp_dir", type=str, default="./experiments/exp0")
+    parser.add_argument("--exp_dir", type=str, default="./experiments/exp1")
     parser.add_argument("--resume", "-r", action="store_true")
     args = parser.parse_args()
     return args
