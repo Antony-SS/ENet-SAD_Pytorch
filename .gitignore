@@ -15,6 +15,7 @@ experiments/exp1/coord_output/
 experiments/exp2/logs/
 experiments/exp2/evaluate/
 experiments/exp2/coord_output/
+DSLDE/labels/
 build/
 develop-eggs/
 dist/

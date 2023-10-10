@@ -10,7 +10,7 @@
   "optim": {
     "lr": 1e-2,
     "momentum": 0.9,
-    "weight_decay": 2e-5,
+    "weight_decay": 2e-4,
     "nesterov": true
   },
   "lr_scheduler": {
