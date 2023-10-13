@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-class Tusimple(Dataset):
+class DSLDE(Dataset):
     """
     image_set is splitted into three partitions: train, val, test.
     train includes label_data_0313.json, label_data_0601.json
@@ -13,16 +13,18 @@ class Tusimple(Dataset):
     """
     TRAIN_SET = ['label_data_0313.json', 'label_data_0601.json']
     VAL_SET = ['label_data_0531.json']
-    TEST_SET = ['test_label.json']
-    def __init__(self, path, image_set, transforms=None):
-        super(Tusimple, self).__init__()
+    # TEST_SET = ['test_label.json']
+    TEST_SET = [] # not a constant, but only changed in constructor
+    def __init__(self, path, image_set, DR_Path, transforms=None): # Pass the path of the DSLDE data test labels here
+        super(DSLDE, self).__init__()
+        self.TEST_SET.append(DR_Path)
         assert image_set in ('train', 'val', 'test'), "image_set is not valid!"
         self.data_dir_path = path
         self.image_set = image_set
         self.transforms = transforms
-        if not os.path.exists(os.path.join(path, "seg_label")):
-            print("Label is going to get generated into dir: {} ...".format(os.path.join(path, "seg_label")))
-            self.generate_label()
+        # if not os.path.exists(os.path.join(path, "seg_label")):
+        print("Label is going to get generated into dir: {} ...".format(os.path.join(path, "seg_label")))
+        self.generate_label()
         self.createIndex()
 
     def createIndex(self):
@@ -30,6 +32,7 @@ class Tusimple(Dataset):
         self.segLabel_list = []
         self.exist_list = []
         listfile = os.path.join(self.data_dir_path, "seg_label", "list", "{}_gt.txt".format(self.image_set))
+        print(listfile)
         if not os.path.exists(listfile):
             raise FileNotFoundError("List file doesn't exist. Label has to be generated! ...")
         with open(listfile) as f:
@@ -68,30 +71,34 @@ class Tusimple(Dataset):
     
     def generate_label(self):
         save_dir = os.path.join(self.data_dir_path, "seg_label")
-        # print(save_dir)
+        print(save_dir)
         os.makedirs(save_dir, exist_ok=True)
 
 
         # --------- merge json into one file ---------
-        with open(os.path.join(save_dir, "train.json"), "w") as outfile:
-            for json_name in self.TRAIN_SET:
-                with open(os.path.join(self.data_dir_path, json_name)) as infile:
-                    for line in infile:
-                        outfile.write(line)
-        with open(os.path.join(save_dir, "val.json"), "w") as outfile:
-            for json_name in self.VAL_SET:
-                with open(os.path.join(self.data_dir_path, json_name)) as infile:
-                    for line in infile:
-                        outfile.write(line)
+        # with open(os.path.join(save_dir, "train.json"), "w") as outfile:
+        #     for json_name in self.TRAIN_SET:
+        #         with open(os.path.join(self.data_dir_path, json_name)) as infile:
+        #             for line in infile:
+        #                 outfile.write(line)
+        # with open(os.path.join(save_dir, "val.json"), "w") as outfile:
+        #     for json_name in self.VAL_SET:
+        #         with open(os.path.join(self.data_dir_path, json_name)) as infile:
+        #             for line in infile:
+        #                 outfile.write(line)
         with open(os.path.join(save_dir, "test.json"), "w") as outfile:
             for json_name in self.TEST_SET:
                 with open(os.path.join(self.data_dir_path, json_name)) as infile:
                     for line in infile:
-                        outfile.write(line)
-        self._gen_label_for_json('train')
-        print("train set is done")
-        self._gen_label_for_json('val')
-        print("val set is done")
+                        labels = json.loads(line)
+                        labels['raw_file'] = "clips/" + self.TEST_SET[0][0:3] + "_figure" + "/" + labels['raw_file']
+                        print(labels['raw_file'])
+                        lineToAdd = json.dumps(labels)
+                        outfile.write(lineToAdd + "\n")
+        # self._gen_label_for_json('train')
+        # print("train set is done")
+        # self._gen_label_for_json('val')
+        # print("val set is done")
         self._gen_label_for_json('test')
         print("test set is done")
         
@@ -145,22 +152,25 @@ class Tusimple(Dataset):
                         cv2.line(seg_img, coords[j], coords[j+1], (i+1, i+1, i+1), SEG_WIDTH//2)
                     list_str.append('1')
                 seg_path = img_path.split("/")
-                # print("Image Path is: ",img_path)
+                # print("Image Path is: ", img_path)
                 # print("Seg Path is: ", seg_path)
-                seg_path, img_name = os.path.join(self.data_dir_path, save_dir, seg_path[1], seg_path[2]), seg_path[3]
+                seg_path, img_name = os.path.join(self.data_dir_path, save_dir, seg_path[1]), seg_path[2]
                 # print("Image name is: ",img_name)
                 # print("Seg Path 2 is: ", seg_path)
                 os.makedirs(seg_path, exist_ok=True)
                 seg_path = os.path.join(seg_path, img_name[:-3]+"png")
                 # print("Seg Path 3 is: ", seg_path)
+                print()
                 cv2.imwrite(seg_path, seg_img)
-                seg_path = "/".join([save_dir, *img_path.split("/")[1:3], img_name[:-3]+"png"])
+                seg_path = "/".join([save_dir, *img_path.split("/")[1:2], img_name[:-3]+"png"])
                 # print("Seg Path 4 is: ", seg_path)
                 if seg_path[0] != '/':
                     seg_path = '/' + seg_path
                 if img_path[0] != '/':
                     img_path = '/' + img_path
                 list_str.insert(0, seg_path)
+                print("segpath is: ", seg_path)
+                print("image path is: ", img_path)
                 list_str.insert(0, img_path)
                 list_str = " ".join(list_str) + "\n"
                 list_f.write(list_str)

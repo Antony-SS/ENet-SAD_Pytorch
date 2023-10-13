@@ -56,10 +56,15 @@ std=(0.2573, 0.2663, 0.2756)
 transform = Compose(Resize(resize_shape), ToTensor(),
                     Normalize(mean=mean, std=std))
 dataset_name = exp_cfg['dataset'].pop('dataset_name')
-print(dataset_name)
-Dataset_Type = getattr(dataset, dataset_name)
-test_dataset = Dataset_Type(Dataset_Path['Tusimple'], "test", transform)
+# Dataset_Type = getattr(dataset, dataset_name)
+Dataset_Type = getattr(dataset, "DSLDE")
+# print(dataset_name)
+# print(Dataset_Path['Tusimple'])
+# test_dataset = Dataset_Type(Dataset_Path['Tusimple'], "test", transform)
+test_dataset = Dataset_Type("./DSLDE", "test", "DR9_label.json", transform) #INSERT TEST DATASET HERE
 test_loader = DataLoader(test_dataset, batch_size=1, collate_fn=test_dataset.collate, num_workers=0)
+
+
 
 if exp_cfg['model'] == "scnn":
     net = SCNN(input_size=resize_shape, pretrained=False)
@@ -67,8 +72,7 @@ elif exp_cfg['model'] == "enet_sad":
     net = ENet_SAD(resize_shape, sad=False, dataset=dataset_name)
 else:
     raise Exception("Model not match. 'model' in 'cfg.json' should be 'scnn' or 'enet_sad'.")
-
-save_name = os.path.join(exp_dir, exp_dir.split('/')[-1] + '_best.pth')
+save_name = os.path.join(exp_dir[:-6], exp_dir.split('/')[-1][:-6] + '_best.pth')
 save_dict = torch.load(save_name, map_location='cpu')
 print("\nloading", save_name, "...... From Epoch: ", save_dict['epoch'])
 net.load_state_dict(save_dict['net'])
@@ -89,6 +93,7 @@ with torch.no_grad():
     for batch_idx, sample in enumerate(test_loader):
         img = sample['img'].to(device)
         img_name = sample['img_name']
+        # print("Image name is: ", img_name)
         seg_pred, exist_pred = net(img)[:2]
         seg_pred = F.softmax(seg_pred, dim=1)
         seg_pred = seg_pred.detach().cpu().numpy()
@@ -102,6 +107,7 @@ with torch.no_grad():
                 lane_coords[i] = sorted(lane_coords[i], key=lambda pair: pair[1])
 
             path_tree = split_path(img_name[b])
+            # print("path tree is: ", path_tree)
             save_dir, save_name = path_tree[-3:-1], path_tree[-1]
             save_dir = os.path.join(out_path, *save_dir)
             save_name = save_name[:-3] + "lines.txt"
@@ -112,13 +118,13 @@ with torch.no_grad():
             with open(save_name, "w") as f:
                 for l in lane_coords:
                     for (x, y) in l:
-                        print("{} {}".format(x, y), end=" ", file=f)
+                        print("{} {}".format(x, y), end = " ", file=f)
                     print(file=f)
 
             json_dict = {}
             json_dict['lanes'] = []
             json_dict['h_sample'] = []
-            json_dict['raw_file'] = (os.path.join(*path_tree[-4:])).replace('\\', '/')
+            json_dict['raw_file'] = (os.path.join(*path_tree[-3:])).replace('\\', '/')
             json_dict['run_time'] = 0
             for l in lane_coords:
                 if len(l) == 0:
@@ -134,16 +140,14 @@ with torch.no_grad():
 progressbar.close()
 
 with open(os.path.join(out_path, "predict_test.json"), "w") as f:
-    count = 0
     for line in dump_to_json:
-        count += 1
         print(line, end="\n", file=f)
-    print("LINE COUNT:", count)
+
 # ---- evaluate ----
 from utils.lane_evaluation.tusimple.lane import LaneEval
 
 eval_result = LaneEval.bench_one_submit(os.path.join(out_path, "predict_test.json"),
-                                        os.path.join(Dataset_Path['Tusimple'],"test_label.json"))
+                                        os.path.join("./DSLDE/seg_label/","test.json"))
 print(eval_result)
 with open(os.path.join(evaluation_path, "evaluation_result.txt"), "w") as f:
     print(eval_result, file=f)

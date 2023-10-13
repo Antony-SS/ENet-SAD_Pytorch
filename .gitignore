@@ -15,7 +15,16 @@ experiments/exp1/coord_output/
 experiments/exp2/logs/
 experiments/exp2/evaluate/
 experiments/exp2/coord_output/
+experiments/exp1_DSLDE/evaluate/
+experiments/exp1_DSLDE/coord_output/
+/DSLDE/DR1_label.json
+/DSLDE/DR2_label.json
+/DSLDE/DR6_label.json
+/DSLDE/DR7_label.json
+/DSLDE/DR9_label.json
 DSLDE/labels/
+DSLDE/clips
+DSLDE/seg_label/
 build/
 develop-eggs/
 dist/

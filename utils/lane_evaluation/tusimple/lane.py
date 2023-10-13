@@ -59,7 +59,11 @@ class LaneEval(object):
         except BaseException as e:
             raise Exception('Fail to load json file of the prediction.')
         json_gt = [json.loads(line) for line in open(gt_file).readlines()]
+        # print("json gt is: ", len(json_gt))
+        # print("json pred is: ", len(json_pred))
         if len(json_gt) != len(json_pred):
+            # for line in json_pred:
+            #     print(line)
             raise Exception('We do not get the predictions of all the test tasks')
         gts = {l['raw_file']: l for l in json_gt}
         accuracy, fp, fn = 0., 0., 0.
@@ -70,6 +74,7 @@ class LaneEval(object):
             pred_lanes = pred['lanes']
             run_time = pred['run_time']
             if raw_file not in gts:
+                print("raw file: ", raw_file)
                 raise Exception('Some raw_file from your predictions do not exist in the test tasks.')
             gt = gts[raw_file]
             gt_lanes = gt['lanes']
