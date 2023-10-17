@@ -61,7 +61,7 @@ Dataset_Type = getattr(dataset, "DSLDE")
 # print(dataset_name)
 # print(Dataset_Path['Tusimple'])
 # test_dataset = Dataset_Type(Dataset_Path['Tusimple'], "test", transform)
-test_dataset = Dataset_Type("./DSLDE", "test", "DR9_label.json", transform) #INSERT TEST DATASET HERE
+test_dataset = Dataset_Type("./DSLDE", "test", "DR6_label.json", transform) #INSERT TEST DATASET HERE
 test_loader = DataLoader(test_dataset, batch_size=1, collate_fn=test_dataset.collate, num_workers=0)
 
 
