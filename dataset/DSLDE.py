@@ -92,7 +92,7 @@ class DSLDE(Dataset):
                     for line in infile:
                         labels = json.loads(line)
                         labels['raw_file'] = "clips/" + self.TEST_SET[0][0:3] + "_figure" + "/" + labels['raw_file']
-                        print(labels['raw_file'])
+                        # print(labels['raw_file'])
                         lineToAdd = json.dumps(labels)
                         outfile.write(lineToAdd + "\n")
         # self._gen_label_for_json('train')
@@ -160,7 +160,6 @@ class DSLDE(Dataset):
                 os.makedirs(seg_path, exist_ok=True)
                 seg_path = os.path.join(seg_path, img_name[:-3]+"png")
                 # print("Seg Path 3 is: ", seg_path)
-                print()
                 cv2.imwrite(seg_path, seg_img)
                 seg_path = "/".join([save_dir, *img_path.split("/")[1:2], img_name[:-3]+"png"])
                 # print("Seg Path 4 is: ", seg_path)
@@ -169,8 +168,8 @@ class DSLDE(Dataset):
                 if img_path[0] != '/':
                     img_path = '/' + img_path
                 list_str.insert(0, seg_path)
-                print("segpath is: ", seg_path)
-                print("image path is: ", img_path)
+                # print("segpath is: ", seg_path)
+                # print("image path is: ", img_path)
                 list_str.insert(0, img_path)
                 list_str = " ".join(list_str) + "\n"
                 list_f.write(list_str)
