@@ -14,6 +14,7 @@ from utils.prob2lines import getLane
 from utils.transforms import *
 
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp_dir", type=str, default="./experiments/exp1")
@@ -59,7 +60,7 @@ dataset_name = exp_cfg['dataset'].pop('dataset_name')
 print(dataset_name)
 Dataset_Type = getattr(dataset, dataset_name)
 test_dataset = Dataset_Type(Dataset_Path['Tusimple'], "test", transform)
-test_loader = DataLoader(test_dataset, batch_size=1, collate_fn=test_dataset.collate, num_workers=0)
+test_loader = DataLoader(test_dataset, batch_size=1, collate_fn=test_dataset.collate, num_workers=5)
 
 if exp_cfg['model'] == "scnn":
     net = SCNN(input_size=resize_shape, pretrained=False)
